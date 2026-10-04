@@ -281,4 +281,4 @@ def bmi_get(
 
 @app.get("/favicon.ico", include_in_schema=False)
 def favicon() -> FileResponse:
-    return FileResponse(STATIC_DIR / "excelcloud-mark.png")
+    return FileResponse(STATIC_DIR / "nextgenmark.jpg")
