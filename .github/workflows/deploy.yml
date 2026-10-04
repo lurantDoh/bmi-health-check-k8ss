@@ -172,7 +172,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER"
+        run: |
+          aws eks update-kubeconfig \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER}"
 
       - name: Apply manifests
         run: |
