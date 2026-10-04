@@ -70,9 +70,12 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Set image metadata
+        id: meta
         env:
           REGISTRY: ${{ steps.ecr.outputs.registry }}
-        run: echo "IMAGE_URI=${REGISTRY}/${ECR_REPOSITORY}" >> "$GITHUB_ENV"
+        run: |
+          echo "IMAGE_URI=${REGISTRY}/${ECR_REPOSITORY}" >> "$GITHUB_ENV"
+          echo "image=${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -83,7 +86,7 @@ jobs:
           context: .
           push: false
           load: true
-          tags: ${{ env.IMAGE_URI }}:${{ env.IMAGE_TAG }}
+          tags: ${{ steps.meta.outputs.image }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -91,7 +94,7 @@ jobs:
         id: trivy
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: ${{ env.IMAGE_URI }}:${{ env.IMAGE_TAG }}
+          image-ref: ${{ steps.meta.outputs.image }}
           format: table
           exit-code: "1"
           severity: CRITICAL,HIGH
@@ -114,7 +117,7 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         continue-on-error: true
         with:
-          image-ref: ${{ env.IMAGE_URI }}:${{ env.IMAGE_TAG }}
+          image-ref: ${{ steps.meta.outputs.image }}
           format: sarif
           output: trivy-results.sarif
           severity: CRITICAL,HIGH,MEDIUM
